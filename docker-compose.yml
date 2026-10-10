@@ -1,4 +1,16 @@
 services:
+
+  gateway:
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+      args:
+        UID: ${UID}
+        GID: ${GID}
+    volumes:
+      - ./apps/gateway:/var/www/html
+    depends_on:
+      - postgres
   postgres:
     image: postgres:18 
     environment:
