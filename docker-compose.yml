@@ -1,0 +1,12 @@
+services:
+  postgres:
+    image: postgres:18 
+    environment:
+      POSTGRES_USER: 'sudopay'
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: 'sudopay'
+    volumes:
+      - pgdata:/var/lib/postgresql
+
+volumes:
+  pgdata:
