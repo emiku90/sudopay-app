@@ -20,13 +20,14 @@ services:
     depends_on:
       - postgres
   postgres:
-    image: postgres:18 
+    image: postgres:18
     environment:
-      POSTGRES_USER: 'sudopay'
+      POSTGRES_USER: "sudopay"
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: 'sudopay'
+      POSTGRES_DB: "sudopay"
     volumes:
       - pgdata:/var/lib/postgresql
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
 
 volumes:
   pgdata:
