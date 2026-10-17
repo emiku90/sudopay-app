@@ -9,5 +9,5 @@ test('it creates a user and checks database name', function () {
     expect(User::where('id', $user->id)->exists())->toBeTrue();
 
     $currentDB = DB::connection()->getDatabaseName();
-    expect($currentDB)->toBe('sudopay_test');
+    expect($currentDB)->toBe('wrong');
 });
