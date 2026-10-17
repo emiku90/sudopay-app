@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  ci:
+    name: Pint, PHPStan, Pest
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Create .env files
+        run: |
+          # Root .env: read by docker compose (build args + Postgres password)
+          {
+            echo "UID=$(id -u)"
+            echo "GID=$(id -g)"
+            echo "DB_PASSWORD=ci-password"
+          } > .env
+
+          # Laravel .env: start from the template, fill in the DB credentials
+          cp apps/gateway/.env.example apps/gateway/.env
+          sed -i \
+            -e 's/^DB_DATABASE=.*/DB_DATABASE=sudopay/' \
+            -e 's/^DB_USERNAME=.*/DB_USERNAME=sudopay/' \
+            -e 's/^DB_PASSWORD=.*/DB_PASSWORD=ci-password/' \
+            apps/gateway/.env
+
+      - name: Start containers
+        run: docker compose up -d --build --wait
+
+      - name: Show containers
+        run: docker compose ps
+
+      - name: Install Composer dependencies
+        run: docker compose exec -T gateway composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Generate app key
+        run: docker compose exec -T gateway php artisan key:generate
+
+      - name: Pint
+        run: docker compose exec -T gateway ./vendor/bin/pint --test
+
+      - name: PHPStan
+        run: docker compose exec -T gateway ./vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+
+      - name: Pest
+        run: docker compose exec -T gateway ./vendor/bin/pest
+
+      - name: Container logs on failure
+        if: failure()
+        run: docker compose logs
