@@ -48,7 +48,7 @@ jobs:
         run: docker compose exec -T gateway ./vendor/bin/pint --test
 
       - name: PHPStan
-        run: docker compose exec -T gateway ./vendor/bin/phpstan analyse --no-progress
+        run: docker compose exec -T gateway ./vendor/bin/phpstan analyse --no-progress --memory-limit=1G
 
       - name: Pest
         run: docker compose exec -T gateway ./vendor/bin/pest
